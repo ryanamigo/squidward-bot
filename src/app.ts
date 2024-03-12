@@ -37,29 +37,45 @@ function onLogout (user: Contact) {
   log.info('StarterBot', '%s logout', user)
 }
 
-async function onMessage (msg: Message) {
-  const message = msg.text().trim()
-  const wxid = msg.talker().id
-  if (!message) {
-    await msg.say('你说什么？我听不懂')
-    return
+async function getQwenAnswer (question: string, wxid: string) {
+  if (!question) {
+    return '你说什么？我听不懂'
   }
   // 如果用户输入的是固定回答的关键词，直接回复
-  const fixedAnswer = getFixedAnswer(message)
+  const fixedAnswer = getFixedAnswer(question)
   if (fixedAnswer) {
-    await msg.say(fixedAnswer)
+    return fixedAnswer
   }
   // 获取用户之前的对话记录，然后调用AI接口进行对话
   const savedMessage = await getSavedMessage<QwenMessage>(wxid)
   // 拼接用户的新消息
-  const newMessage: QwenMessage[] =  [ ...savedMessage, { content: message, role: 'user' } ]
+  const newMessage: QwenMessage[] =  [ ...savedMessage, { content: question, role: 'user' } ]
   // 调用AI接口
   const { content, error, role } = await askQwen(newMessage)
-  // 给用户发送消息
-  await msg.say(content)
   if (!error) {
     // 保存用户的对话记录
     await saveMessage(wxid, [ ...newMessage, { content, role } ])
+  }
+  // 给用户发送消息
+  return content
+}
+
+async function onMessage (msg: Message) {
+  const message = msg.text().trim()
+  let wxid: string | undefined
+  if (msg.room()) {
+    const isMention = await msg.mentionSelf()
+    if (isMention) {
+      wxid = msg.room()?.id
+    }
+    return
+  } else {
+    wxid = msg.talker().id
+  }
+  if (wxid) {
+    const answer = await getQwenAnswer(message, wxid)
+    // 给用户发送消息
+    await msg.say(answer)
   }
 }
 
