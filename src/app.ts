@@ -10,9 +10,9 @@ import {
 }                  from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
-import { getFixedAnswer } from '../src/utils/fixed-answers'
-import { askQwen, type QwenMessage } from '../src/utils/ai'
-import { getSavedMessage, saveMessage } from '../src/utils'
+import { getFixedAnswer } from './utils/fixed-answers.js'
+import { askQwen, type QwenMessage } from './utils/ai.js'
+import { getSavedMessage, saveMessage } from './utils/index.js'
 
 function onScan (qrcode: string, status: ScanStatus) {
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
@@ -39,7 +39,7 @@ function onLogout (user: Contact) {
 
 async function onMessage (msg: Message) {
   const message = msg.text().trim()
-  const wxid = msg.from()?.id
+  const wxid = msg.talker().id
   if (!message) {
     await msg.say('你说什么？我听不懂')
     return
