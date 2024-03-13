@@ -61,18 +61,22 @@ async function getQwenAnswer (question: string, wxid: string) {
 }
 
 async function onMessage (msg: Message) {
-  const message = msg.text().trim()
+  let message = msg.text().trim()
+  log.info('收到消息：', message)
   let wxid: string | undefined
+  log.info('是否群消息：', msg.room())
   if (msg.room()) {
     const isMention = await msg.mentionSelf()
+    log.info('是否@我', isMention)
     if (isMention) {
       wxid = msg.room()?.id
+      const spliter = ' '
+      message = (message.split(spliter)[1] || '').trim()
     }
-    return
   } else {
     wxid = msg.talker().id
   }
-  if (wxid && !wxid.includes('weixin')) {
+  if (wxid && !wxid.includes('weixin') && message) {
     const answer = await getQwenAnswer(message, wxid)
     // 给用户发送消息
     await msg.say(answer)
