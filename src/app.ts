@@ -72,7 +72,7 @@ async function onMessage (msg: Message) {
   } else {
     wxid = msg.talker().id
   }
-  if (wxid) {
+  if (wxid && !wxid.includes('weixin')) {
     const answer = await getQwenAnswer(message, wxid)
     // 给用户发送消息
     await msg.say(answer)
