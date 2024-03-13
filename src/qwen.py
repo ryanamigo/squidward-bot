@@ -14,6 +14,7 @@ def hello(model):
       messages=messages,
       # set the random seed, optional, default to 1234 if not set
       result_format='message',  # set the result to be "message" format.
+      enable_search=True,
   )
   if response.status_code == HTTPStatus.OK:
     return response
