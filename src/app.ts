@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 /* eslint-disable import/extensions */
 import 'dotenv/config.js'
 
@@ -70,8 +71,8 @@ async function onMessage (msg: Message) {
     log.info('是否@我', isMention)
     if (isMention) {
       wxid = msg.room()?.id
-      const spliter = ' '
-      message = (message.split(spliter)[1] || '').trim()
+      // 如果是群消息，去掉@机器人的名字，格式是 @机器人空格空格xxx 或 @机器人 xxx
+      message = message.replace(/@.*\s+/, '').replace(/@.* /, '')
     }
   } else {
     wxid = msg.talker().id
